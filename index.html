@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha - Python no Navegador</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            color: #333;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .celula {
+            aspect-ratio: 1;
+            background: #f8f9fa;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .celula:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+
+        .celula:active {
+            transform: scale(0.95);
+        }
+
+        .celula.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .celula.x {
+            color: #e74c3c;
+        }
+
+        .celula.o {
+            color: #3498db;
+        }
+
+        .btn-reiniciar {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reiniciar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-reiniciar:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .vencedor {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            animation: pulse 0.5s ease;
+        }
+
+        .empate {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Jogo da Velha</h1>
+        <p class="subtitle">Desenvolvido por Geêndersom Araújo | Python no Navegador</p>
+        <div id="status" class="status">Carregando Python...</div>
+        <div class="tabuleiro" id="tabuleiro">
+            <div class="celula" data-pos="7"></div>
+            <div class="celula" data-pos="8"></div>
+            <div class="celula" data-pos="9"></div>
+            <div class="celula" data-pos="4"></div>
+            <div class="celula" data-pos="5"></div>
+            <div class="celula" data-pos="6"></div>
+            <div class="celula" data-pos="1"></div>
+            <div class="celula" data-pos="2"></div>
+            <div class="celula" data-pos="3"></div>
+        </div>
+        <button class="btn-reiniciar" id="reiniciar">🔄 Reiniciar Jogo</button>
+    </div>
+
+    <script>
+        let pyodide;
+        let jogo;
+
+        // Função para atualizar o tabuleiro visual
+        function atualizarTabuleiro(tabuleiro) {
+            const celulas = document.querySelectorAll('.celula');
+            celulas.forEach(celula => {
+                const pos = celula.getAttribute('data-pos');
+                const valor = tabuleiro[pos];
+                celula.textContent = valor === ' ' ? '' : valor;
+                celula.className = 'celula';
+                if (valor === 'X') {
+                    celula.classList.add('x');
+                } else if (valor === 'O') {
+                    celula.classList.add('o');
+                }
+            });
+        }
+
+        // Função para atualizar o status
+        function atualizarStatus(mensagem, tipo = '') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = mensagem;
+            statusEl.className = 'status';
+            if (tipo === 'vencedor') {
+                statusEl.classList.add('vencedor');
+            } else if (tipo === 'empate') {
+                statusEl.classList.add('empate');
+            }
+        }
+
+        // Função para habilitar/desabilitar células
+        function habilitarCelulas(habilitado) {
+            const celulas = document.querySelectorAll('.celula');
+            celulas.forEach(celula => {
+                if (habilitado) {
+                    celula.classList.remove('disabled');
+                } else {
+                    celula.classList.add('disabled');
+                }
+            });
+        }
+
+        // Função para fazer uma jogada
+        async function fazerJogada(posicao) {
+            if (!jogo) return;
+            
+            try {
+                // Verifica se a jogada é válida
+                const jogadaValida = await pyodide.runPython(`
+                    jogo.verificar_jogada('${posicao}')
+                `);
+                
+                if (!jogadaValida) {
+                    return;
+                }
+
+                // Faz a jogada
+                await pyodide.runPython(`
+                    jogo.tabuleiro['${posicao}'] = jogo.turno
+                `);
+
+                // Atualiza o tabuleiro
+                const tabuleiro = await pyodide.runPython(`
+                    dict(jogo.tabuleiro)
+                `);
+                atualizarTabuleiro(tabuleiro);
+
+                // Verifica o estado do jogo
+                const estado = await pyodide.runPython(`
+                    jogo.verificar_tabuleiro()
+                `);
+
+                if (estado === 'X' || estado === 'O') {
+                    atualizarStatus(`${estado} é o vencedor!!! 🎉`, 'vencedor');
+                    habilitarCelulas(false);
+                } else if (estado === 'empate') {
+                    atualizarStatus('EMPATE!!! 🤝', 'empate');
+                    habilitarCelulas(false);
+                } else {
+                    // Troca o turno
+                    await pyodide.runPython(`
+                        jogo.turno = "X" if jogo.turno == "O" else "O"
+                    `);
+                    const turno = await pyodide.runPython(`jogo.turno`);
+                    atualizarStatus(`Turno do ${turno}`);
+                }
+            } catch (error) {
+                console.error('Erro ao fazer jogada:', error);
+            }
+        }
+
+        // Função para reiniciar o jogo
+        async function reiniciarJogo() {
+            if (!pyodide) return;
+            
+            try {
+                await pyodide.runPython(`
+                    jogo = JogoDaVelha()
+                `);
+                jogo = await pyodide.runPython(`jogo`);
+                
+                const tabuleiro = await pyodide.runPython(`
+                    dict(jogo.tabuleiro)
+                `);
+                atualizarTabuleiro(tabuleiro);
+                
+                const turno = await pyodide.runPython(`jogo.turno`);
+                atualizarStatus(`Turno do ${turno}`);
+                habilitarCelulas(true);
+            } catch (error) {
+                console.error('Erro ao reiniciar:', error);
+            }
+        }
+
+        // Inicializar Pyodide e carregar o código Python
+        async function main() {
+            atualizarStatus('Carregando Python...');
+            
+            pyodide = await loadPyodide();
+            
+            atualizarStatus('Carregando jogo...');
+            
+            // Carregar o código Python do arquivo
+            try {
+                const response = await fetch('JogoDaVelha.py');
+                const codigoPython = await response.text();
+                
+                await pyodide.runPython(codigoPython);
+                
+                // Criar instância do jogo
+                await pyodide.runPython(`
+                    jogo = JogoDaVelha()
+                `);
+                
+                jogo = await pyodide.runPython(`jogo`);
+                
+                // Atualizar interface inicial
+                const tabuleiro = await pyodide.runPython(`
+                    dict(jogo.tabuleiro)
+                `);
+                atualizarTabuleiro(tabuleiro);
+                
+                const turno = await pyodide.runPython(`jogo.turno`);
+                atualizarStatus(`Turno do ${turno}`);
+                
+                // Adicionar event listeners
+                const celulas = document.querySelectorAll('.celula');
+                celulas.forEach(celula => {
+                    celula.addEventListener('click', () => {
+                        const pos = celula.getAttribute('data-pos');
+                        fazerJogada(pos);
+                    });
+                });
+                
+                document.getElementById('reiniciar').addEventListener('click', reiniciarJogo);
+                
+            } catch (error) {
+                console.error('Erro ao carregar código Python:', error);
+                atualizarStatus('Erro ao carregar o jogo. Verifique se o arquivo JogoDaVelha.py existe.');
+            }
+        }
+
+        // Iniciar quando a página carregar
+        main();
+    </script>
+</body>
+</html>
