@@ -156,9 +156,17 @@ class JogoDaVelha:
 # Inicializa o jogo quando o código Python é carregado
 def inicializar_jogo():
     """Função principal para inicializar o jogo - escrita em Python"""
-    global jogo
-    jogo = JogoDaVelha()
-    console.log("Jogo da Velha inicializado com Python!")
+    try:
+        global jogo
+        jogo = JogoDaVelha()
+        console.log("✅ Jogo da Velha inicializado com Python!")
+    except Exception as e:
+        console.error(f"❌ Erro ao inicializar jogo: {e}")
+        status_el = document.getElementById('status')
+        if status_el:
+            status_el.textContent = f"Erro ao inicializar: {str(e)}"
+            status_el.style.background = '#f8d7da'
+            status_el.style.color = '#721c24'
 
 # Executa a inicialização
 inicializar_jogo()

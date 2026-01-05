@@ -1,0 +1,26 @@
+🎮 JOGO DA VELHA - COMO EXECUTAR
+================================
+
+⚠️ IMPORTANTE: Este jogo NÃO pode ser aberto diretamente clicando no arquivo HTML.
+Ele precisa ser executado através de um servidor HTTP.
+
+📋 INSTRUÇÕES:
+
+1. Abra o terminal na pasta do projeto:
+   cd /Users/geendersomaraujo/Desktop/jogo-da-velha
+
+2. Execute o servidor Python:
+   python3 server.py
+
+3. O navegador abrirá automaticamente em:
+   http://localhost:8000
+
+4. Se não abrir automaticamente, acesse manualmente:
+   http://localhost:8000/index.html
+
+5. Para parar o servidor, pressione Ctrl+C no terminal
+
+✅ O jogo está totalmente escrito em Python e será executado no navegador!
+
+🐍 Linguagem Principal: Python
+🌐 Execução: Navegador (via Pyodide)

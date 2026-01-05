@@ -174,17 +174,37 @@
         
         async function main() {
             const statusEl = document.getElementById('status');
+            
+            // Verifica se está sendo executado via file://
+            if (window.location.protocol === 'file:') {
+                statusEl.innerHTML = '⚠️ Este jogo precisa ser executado via servidor HTTP.<br><br>Execute: <code>python3 server.py</code><br>Depois acesse: <code>http://localhost:8000</code>';
+                statusEl.style.background = '#fff3cd';
+                statusEl.style.color = '#856404';
+                statusEl.style.fontSize = '0.9em';
+                statusEl.style.padding = '20px';
+                return;
+            }
+            
             statusEl.textContent = 'Carregando Python...';
             
             try {
                 // Carrega o Pyodide
+                statusEl.textContent = 'Carregando Python (isso pode levar alguns segundos)...';
                 const pyodide = await loadPyodide();
                 
                 statusEl.textContent = 'Carregando jogo...';
                 
                 // Carrega o código Python do arquivo
-                const response = await fetch('JogoDaVelha.py');
-                const codigoPython = await response.text();
+                let codigoPython;
+                try {
+                    const response = await fetch('JogoDaVelha.py');
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    codigoPython = await response.text();
+                } catch (fetchError) {
+                    throw new Error(`Não foi possível carregar JogoDaVelha.py: ${fetchError.message}. Certifique-se de que o arquivo existe e está no mesmo diretório.`);
+                }
                 
                 // Executa o código Python (que já inicializa o jogo)
                 await pyodide.runPython(codigoPython);
@@ -193,7 +213,11 @@
                 
             } catch (error) {
                 console.error('Erro ao carregar código Python:', error);
-                statusEl.textContent = 'Erro ao carregar o jogo. Verifique se o arquivo JogoDaVelha.py existe.';
+                statusEl.innerHTML = `❌ Erro ao carregar o jogo:<br><br>${error.message}<br><br>Certifique-se de executar via servidor HTTP usando: <code>python3 server.py</code>`;
+                statusEl.style.background = '#f8d7da';
+                statusEl.style.color = '#721c24';
+                statusEl.style.fontSize = '0.9em';
+                statusEl.style.padding = '20px';
             }
         }
 
