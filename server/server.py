@@ -8,10 +8,17 @@ import http.server
 import socketserver
 import webbrowser
 import os
+import sys
 
 PORT = 8000
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        # Muda o diretório de trabalho para a raiz do projeto
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(project_root)
+        super().__init__(*args, **kwargs)
+    
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
@@ -19,16 +26,20 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 def main():
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    # Garante que estamos na raiz do projeto
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    os.chdir(project_root)
     
     with socketserver.TCPServer(("", PORT), MyHTTPRequestHandler) as httpd:
         print(f"🚀 Servidor iniciado em http://localhost:{PORT}")
         print(f"📂 Servindo arquivos de: {os.getcwd()}")
         print(f"🌐 Abrindo navegador automaticamente...")
+        print(f"📄 Acesse: http://localhost:{PORT}/web/index.html")
         print(f"⏹️  Pressione Ctrl+C para parar o servidor\n")
         
         # Abrir navegador automaticamente
-        webbrowser.open(f'http://localhost:{PORT}/index.html')
+        webbrowser.open(f'http://localhost:{PORT}/web/index.html')
         
         try:
             httpd.serve_forever()
