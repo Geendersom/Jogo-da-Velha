@@ -2,7 +2,7 @@
 # Desenvolvido por Geêndersom Araújo
 # Linguagem principal: Python
 
-from js import document, console
+from js import document, console, window
 from pyodide.ffi import create_proxy
 
 class JogoDaVelha:
@@ -140,6 +140,13 @@ class JogoDaVelha:
 
         # Faz a jogada
         self.tabuleiro[posicao] = self.turno
+        
+        # Toca som de clique
+        try:
+            window.tocarSomClique()
+        except:
+            pass
+        
         self.atualizar_tabuleiro_visual()
 
         # Verifica o estado do jogo
@@ -155,6 +162,19 @@ class JogoDaVelha:
         if estado == "X" or estado == "O":
             # Atualiza o tabuleiro destacando a sequência vencedora
             self.atualizar_tabuleiro_visual(posicoes_vencedoras)
+            
+            # Cria animação de linha de vitória
+            try:
+                window.criarLinhaVitoria(posicoes_vencedoras)
+            except:
+                pass
+            
+            # Toca som de vitória
+            try:
+                window.tocarSomVitoria()
+            except:
+                pass
+            
             self.atualizar_status(f"{estado} é o vencedor!!! 🎉", 'vencedor')
             self.habilitar_celulas(False)
             self.jogo_ativo = False
@@ -169,6 +189,12 @@ class JogoDaVelha:
 
     def reiniciar(self):
         """Reinicia o jogo - toda a lógica em Python"""
+        # Remove linha de vitória
+        try:
+            window.removerLinhaVitoria()
+        except:
+            pass
+        
         self.tabuleiro = {'7': ' ', '8': ' ', '9': ' ', '4': ' ', '5': ' ', '6': ' ', '1': ' ', '2': ' ', '3': ' '}
         self.turno = "X"
         self.jogo_ativo = True

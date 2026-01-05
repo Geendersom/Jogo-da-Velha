@@ -23,12 +23,229 @@
                 <div class="celula" data-pos="1"></div>
                 <div class="celula" data-pos="2"></div>
                 <div class="celula" data-pos="3"></div>
+                <div class="linha-vitoria" id="linha-vitoria"></div>
             </div>
         </div>
         <button class="btn-reiniciar" id="reiniciar">Reiniciar Jogo</button>
     </div>
 
     <script>
+        // ============================================
+        // SISTEMA DE SONS NEON
+        // ============================================
+        
+        // Contexto de áudio global (inicializado na primeira interação)
+        let audioContext = null;
+        
+        function getAudioContext() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    return null;
+                }
+            }
+            // Resumir contexto se estiver suspenso
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            return audioContext;
+        }
+        
+        // Gerador de som neon de clique
+        function tocarSomClique() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            
+            try {
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.1);
+            } catch (e) {
+                // Silenciosamente falha se não conseguir tocar
+            }
+        }
+        
+        // Gerador de som neon de vitória
+        function tocarSomVitoria() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            
+            try {
+                // Sequência de notas para som de vitória (acorde maior)
+                const notes = [523.25, 659.25, 783.99, 987.77]; // C5, E5, G5, B5
+                let time = ctx.currentTime;
+                
+                notes.forEach((freq, index) => {
+                    const oscillator = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0, time);
+                    gainNode.gain.linearRampToValueAtTime(0.12, time + 0.05);
+                    gainNode.gain.linearRampToValueAtTime(0, time + 0.25);
+                    
+                    oscillator.start(time);
+                    oscillator.stop(time + 0.25);
+                    
+                    time += 0.12;
+                });
+            } catch (e) {
+                // Silenciosamente falha se não conseguir tocar
+            }
+        }
+        
+        // Função para criar animação de linha de vitória
+        function criarLinhaVitoria(posicoes) {
+            const linhaEl = document.getElementById('linha-vitoria');
+            if (!linhaEl || !posicoes || posicoes.length !== 3) return;
+            
+            // Remove classes anteriores
+            linhaEl.className = 'linha-vitoria';
+            linhaEl.style.display = 'none';
+            
+            // Mapeia posições para coordenadas (grid 3x3)
+            const posMap = {
+                '7': {row: 0, col: 0}, '8': {row: 0, col: 1}, '9': {row: 0, col: 2},
+                '4': {row: 1, col: 0}, '5': {row: 1, col: 1}, '6': {row: 1, col: 2},
+                '1': {row: 2, col: 0}, '2': {row: 2, col: 1}, '3': {row: 2, col: 2}
+            };
+            
+            const coords = posicoes.map(p => posMap[p]).filter(c => c !== undefined);
+            if (coords.length !== 3) return;
+            
+            // Ordena coordenadas
+            coords.sort((a, b) => {
+                if (a.row !== b.row) return a.row - b.row;
+                return a.col - b.col;
+            });
+            
+            const tabuleiroEl = document.getElementById('tabuleiro');
+            const tabuleiroWidth = tabuleiroEl.offsetWidth;
+            const padding = 20;
+            const gap = 12;
+            const cellSize = (tabuleiroWidth - padding * 2 - gap * 2) / 3;
+            
+            let tipo = '';
+            let left = 0;
+            let top = 0;
+            let width = 0;
+            let height = 0;
+            let transform = '';
+            
+            // Verifica se é horizontal (mesma linha)
+            if (coords[0].row === coords[1].row && coords[1].row === coords[2].row) {
+                tipo = 'horizontal';
+                const row = coords[0].row;
+                left = padding;
+                top = padding + (row * (cellSize + gap)) + (cellSize / 2) - 2;
+                width = cellSize * 3 + gap * 2;
+                height = 4;
+            }
+            // Verifica se é vertical (mesma coluna)
+            else if (coords[0].col === coords[1].col && coords[1].col === coords[2].col) {
+                tipo = 'vertical';
+                const col = coords[0].col;
+                left = padding + (col * (cellSize + gap)) + (cellSize / 2) - 2;
+                top = padding;
+                width = 4;
+                height = cellSize * 3 + gap * 2;
+            }
+            // Verifica se é diagonal
+            else {
+                const sortedPos = [...posicoes].sort();
+                const posStr = sortedPos.join('');
+                
+                // Diagonal principal (7-5-3) - de cima-esquerda para baixo-direita
+                if (posStr === '357') {
+                    tipo = 'diagonal-1';
+                    const diagonalLength = Math.sqrt(Math.pow(cellSize * 3 + gap * 2, 2) * 2);
+                    left = padding;
+                    top = padding;
+                    width = diagonalLength;
+                    height = 4;
+                    transform = 'rotate(45deg)';
+                    transformOrigin = 'top left';
+                }
+                // Diagonal secundária (1-5-9) - de baixo-esquerda para cima-direita
+                else if (posStr === '159') {
+                    tipo = 'diagonal-2';
+                    const diagonalLength = Math.sqrt(Math.pow(cellSize * 3 + gap * 2, 2) * 2);
+                    left = padding + (cellSize * 3 + gap * 2);
+                    top = padding;
+                    width = diagonalLength;
+                    height = 4;
+                    transform = 'rotate(-45deg)';
+                    transformOrigin = 'top right';
+                }
+            }
+            
+            if (tipo) {
+                linhaEl.className = `linha-vitoria ${tipo}`;
+                linhaEl.style.left = `${left}px`;
+                linhaEl.style.top = `${top}px`;
+                
+                // Define variáveis CSS para animação
+                if (tipo === 'horizontal') {
+                    linhaEl.style.setProperty('--linha-width', `${width}px`);
+                    linhaEl.style.width = '0';
+                    linhaEl.style.height = `${height}px`;
+                } else if (tipo === 'vertical') {
+                    linhaEl.style.setProperty('--linha-height', `${height}px`);
+                    linhaEl.style.width = `${width}px`;
+                    linhaEl.style.height = '0';
+                } else {
+                    const diagonalHeight = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+                    linhaEl.style.setProperty('--linha-height', `${diagonalHeight}px`);
+                    linhaEl.style.width = `${width}px`;
+                    linhaEl.style.height = '0';
+                    if (transform) {
+                        linhaEl.style.transform = transform;
+                        linhaEl.style.transformOrigin = transformOrigin;
+                    }
+                }
+                
+                linhaEl.style.display = 'block';
+                
+                // Ativa animação após pequeno delay
+                setTimeout(() => {
+                    linhaEl.classList.add('ativa');
+                }, 50);
+            }
+        }
+        
+        // Função para remover linha de vitória
+        function removerLinhaVitoria() {
+            const linhaEl = document.getElementById('linha-vitoria');
+            if (linhaEl) {
+                linhaEl.classList.remove('ativa');
+                linhaEl.className = 'linha-vitoria';
+                linhaEl.style.display = 'none';
+            }
+        }
+        
+        // Exporta funções para uso no Python
+        window.tocarSomClique = tocarSomClique;
+        window.tocarSomVitoria = tocarSomVitoria;
+        window.criarLinhaVitoria = criarLinhaVitoria;
+        window.removerLinhaVitoria = removerLinhaVitoria;
+        
         // JavaScript mínimo - apenas para inicializar o Pyodide
         // Toda a lógica do jogo está em Python
         
