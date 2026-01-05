@@ -1,3 +1,13 @@
+# Arquivos de código - esconder do Git
+*.py
+*.html
+*.css
+*.js
+*.txt
+
+# Documentação - manter arquivos .md visíveis
+# *.md não será ignorado (README.md, ESTRUTURA.md, etc.)
+
 # Python
 __pycache__/
 *.py[cod]
@@ -22,3 +32,13 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Imagens e outros assets
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.svg
+
+# Manter apenas estrutura de pastas
+# (arquivos .gitkeep serão visíveis)
