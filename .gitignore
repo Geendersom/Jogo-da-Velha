@@ -3,6 +3,9 @@
 *.html
 *.css
 *.js
+*.ts
+*.tsx
+*.jsx
 *.txt
 
 # Documentação - manter arquivos .md visíveis

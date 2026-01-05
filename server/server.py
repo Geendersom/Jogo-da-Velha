@@ -35,11 +35,11 @@ def main():
         print(f"🚀 Servidor iniciado em http://localhost:{PORT}")
         print(f"📂 Servindo arquivos de: {os.getcwd()}")
         print(f"🌐 Abrindo navegador automaticamente...")
-        print(f"📄 Acesse: http://localhost:{PORT}/web/index.html")
+        print(f"📄 Acesse: http://localhost:{PORT}/web/selecao.html")
         print(f"⏹️  Pressione Ctrl+C para parar o servidor\n")
         
-        # Abrir navegador automaticamente
-        webbrowser.open(f'http://localhost:{PORT}/web/index.html')
+        # Abrir navegador automaticamente na tela de seleção
+        webbrowser.open(f'http://localhost:{PORT}/web/selecao.html')
         
         try:
             httpd.serve_forever()
