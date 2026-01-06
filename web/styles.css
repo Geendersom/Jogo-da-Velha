@@ -530,7 +530,7 @@ body::after {
         repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(155, 92, 255, 0.08) 2px, rgba(155, 92, 255, 0.08) 4px);
     backdrop-filter: blur(10px);
     border-radius: 20px;
-    padding: 25px;
+    padding: 20px;
     box-shadow: 
         0 0 20px rgba(155, 92, 255, 0.3),
         0 0 35px rgba(155, 92, 255, 0.2),
@@ -542,13 +542,13 @@ body::after {
 .jogador-selecao h2 {
     color: #9b5cff;
     text-align: center;
-    margin-bottom: 12px;
-    font-size: 1.3em;
+    margin-bottom: 10px;
+    font-size: 1.2em;
     text-shadow: 0 0 8px rgba(155, 92, 255, 0.6);
 }
 
 .nome-selecao {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     text-align: center;
 }
 
@@ -589,7 +589,7 @@ body::after {
 .imagens-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 15px;
     padding-bottom: 0;
 }
@@ -599,7 +599,7 @@ body::after {
     text-align: center;
     transition: all 0.3s ease;
     position: relative;
-    padding: 10px;
+    padding: 6px;
     box-sizing: border-box;
 }
 
@@ -615,13 +615,13 @@ body::after {
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 8px;
+    padding: 5px;
     box-sizing: border-box;
 }
 
 .imagem-preview img {
-    width: 80%;
-    height: 80%;
+    width: 85%;
+    height: 85%;
     object-fit: contain;
     border-radius: 6px;
 }
@@ -637,6 +637,32 @@ body::after {
     border-color: #9b5cff;
     box-shadow: 0 0 15px rgba(155, 92, 255, 0.8);
     transform: scale(1.05);
+}
+
+/* Tooltip que aparece apenas no hover */
+.imagem-opcao::after {
+    content: attr(data-nome);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(18, 5, 29, 0.95);
+    color: #9b5cff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    border: 1px solid rgba(155, 92, 255, 0.4);
+    box-shadow: 0 0 10px rgba(155, 92, 255, 0.3);
+    z-index: 10;
+    font-weight: bold;
+}
+
+.imagem-opcao:hover::after {
+    opacity: 1;
 }
 
 
