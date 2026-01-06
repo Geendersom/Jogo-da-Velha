@@ -603,6 +603,7 @@ body::after {
     position: relative;
     padding: 6px;
     box-sizing: border-box;
+    overflow: visible;
 }
 
 .imagem-preview {
@@ -628,7 +629,6 @@ body::after {
     border-radius: 6px;
 }
 
-
 .imagem-opcao:hover .imagem-preview {
     border-color: rgba(155, 92, 255, 0.6);
     box-shadow: 0 0 12px rgba(155, 92, 255, 0.4);
@@ -641,18 +641,19 @@ body::after {
     transform: scale(1.05);
 }
 
-/* Tooltip que aparece apenas no hover */
+/* Tooltip que aparece apenas no hover - sobrepondo a borda inferior */
+
 .imagem-opcao::after {
     content: attr(data-nome);
     position: absolute;
-    bottom: -30px;
+    bottom: 0;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(50%);
     background: rgba(18, 5, 29, 0.95);
     color: #9b5cff;
-    padding: 4px 8px;
+    padding: 3px 8px;
     border-radius: 6px;
-    font-size: 0.75em;
+    font-size: 0.7em;
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
