@@ -1,0 +1,853 @@
+/* Reset e configurações gerais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilos do body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Imagem de fundo com desfoque e escurecimento */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../wallpaper.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    filter: blur(8px) brightness(0.5);
+    z-index: -2;
+}
+
+/* Overlay escuro nas bordas - gradiente radial */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, 
+        transparent 0%, 
+        transparent 30%, 
+        rgba(0, 0, 0, 0.3) 60%, 
+        rgba(0, 0, 0, 0.6) 80%, 
+        rgba(0, 0, 0, 0.9) 100%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Container principal - estilo neon roxo */
+.container {
+    background: 
+        linear-gradient(135deg, rgba(18, 5, 29, 0.95) 0%, rgba(42, 13, 63, 0.95) 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(155, 92, 255, 0.08) 2px, rgba(155, 92, 255, 0.08) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(155, 92, 255, 0.08) 2px, rgba(155, 92, 255, 0.08) 4px);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 
+        0 0 20px rgba(155, 92, 255, 0.3),
+        0 0 35px rgba(155, 92, 255, 0.2),
+        0 0 50px rgba(155, 92, 255, 0.1),
+        inset 0 0 15px rgba(155, 92, 255, 0.05);
+    border: 2px solid rgba(155, 92, 255, 0.3);
+    max-width: 500px;
+    width: calc(100% - 40px);
+    z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px auto;
+}
+
+/* Título em card neon - removido, agora está em .titulo-card */
+
+/* Status do jogo - estilo neon roxo */
+.status {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(18, 5, 29, 0.9) 0%, rgba(42, 13, 63, 0.9) 100%);
+    border-radius: 10px;
+    color: #9b5cff;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 5px rgba(155, 92, 255, 0.6);
+    border: 1px solid rgba(155, 92, 255, 0.3);
+    box-shadow: 0 0 10px rgba(155, 92, 255, 0.2);
+}
+
+/* Wrapper do tabuleiro para linhas horizontais */
+.tabuleiro-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1;
+}
+
+/* Tabuleiro - estilo neon roxo profissional */
+.tabuleiro {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, #12051d 0%, #2a0d3f 100%);
+    border-radius: 20px;
+    position: relative;
+    border: 2px solid rgba(155, 92, 255, 0.4);
+    box-shadow: 
+        0 0 15px rgba(155, 92, 255, 0.3),
+        0 0 25px rgba(155, 92, 255, 0.2),
+        inset 0 0 15px rgba(155, 92, 255, 0.08);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Linha neon de vitória - animação */
+.linha-vitoria {
+    position: absolute;
+    background: #9b5cff;
+    box-shadow: 
+        0 0 8px rgba(155, 92, 255, 0.8),
+        0 0 15px rgba(155, 92, 255, 0.6),
+        0 0 25px rgba(155, 92, 255, 0.4);
+    z-index: 3; /* Acima das células (z-index: 2) para sobrepor os símbolos */
+    pointer-events: none;
+    opacity: 0;
+    border-radius: 2px;
+}
+
+.linha-vitoria.ativa {
+    opacity: 1;
+    animation: linhaVitoriaAnimacao 0.6s ease-out forwards;
+}
+
+/* Linha horizontal */
+.linha-vitoria.horizontal {
+    height: 4px;
+    width: 0;
+}
+
+.linha-vitoria.horizontal.ativa {
+    animation: linhaHorizontalAnimacao 0.6s ease-out forwards;
+}
+
+/* Linha vertical */
+.linha-vitoria.vertical {
+    width: 4px;
+    height: 0;
+}
+
+.linha-vitoria.vertical.ativa {
+    animation: linhaVerticalAnimacao 0.6s ease-out forwards;
+}
+
+/* Linha diagonal */
+.linha-vitoria.diagonal-1,
+.linha-vitoria.diagonal-2 {
+    width: 0;
+    height: 4px;
+    /* Aplica rotação diretamente no CSS usando variável */
+    transform: rotate(var(--linha-angle, 0deg));
+    transform-origin: var(--linha-transform-origin, left center);
+    /* Garante que a linha seja visível quando ativa */
+    opacity: 0;
+}
+
+.linha-vitoria.diagonal-1.ativa,
+.linha-vitoria.diagonal-2.ativa {
+    animation: linhaDiagonalAnimacao 0.6s ease-out forwards;
+}
+
+@keyframes linhaHorizontalAnimacao {
+    0% {
+        opacity: 0;
+        width: 0;
+    }
+    100% {
+        opacity: 1;
+        width: var(--linha-width, 100%);
+    }
+}
+
+@keyframes linhaVerticalAnimacao {
+    0% {
+        opacity: 0;
+        height: 0;
+    }
+    100% {
+        opacity: 1;
+        height: var(--linha-height, 100%);
+    }
+}
+
+@keyframes linhaDiagonalAnimacao {
+    0% {
+        opacity: 0;
+        width: 0;
+    }
+    100% {
+        opacity: 1;
+        width: var(--linha-width, 100%);
+    }
+}
+
+/* Garante que a rotação seja aplicada mesmo durante a animação */
+.linha-vitoria.diagonal-1.ativa,
+.linha-vitoria.diagonal-2.ativa {
+    transform: rotate(var(--linha-angle, 0deg)) !important;
+    transform-origin: var(--linha-transform-origin, left center) !important;
+}
+
+
+
+
+/* Células do tabuleiro - cards individuais estilo neon roxo */
+.celula {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #1a0a2e 0%, #2a0d3f 100%);
+    border: 2px solid rgba(155, 92, 255, 0.2);
+    border-radius: 12px;
+    font-size: 6.8em;
+    font-weight: 200;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: transparent;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    line-height: 1;
+    box-shadow: 
+        0 0 6px rgba(155, 92, 255, 0.12),
+        inset 0 0 6px rgba(155, 92, 255, 0.02);
+    letter-spacing: -0.05em;
+}
+
+.celula:hover:not(.disabled) {
+    background: linear-gradient(135deg, #2a0d3f 0%, #3a154f 100%);
+    border-color: rgba(155, 92, 255, 0.4);
+    box-shadow: 
+        0 0 12px rgba(155, 92, 255, 0.25),
+        inset 0 0 12px rgba(155, 92, 255, 0.08);
+    transform: scale(1.04);
+}
+
+.celula:active {
+    transform: scale(0.95);
+}
+
+.celula.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Peça X - azul neon estilo tubo de vidro: contorno luminoso + inner glow realista */
+.celula.x {
+    color: rgba(79, 195, 255, 0.15); /* Interior muito escuro do tubo */
+    font-weight: 200; /* Fino e elegante */
+    /* Contorno forte e nítido do tubo de vidro */
+    -webkit-text-stroke: 3px rgba(79, 195, 255, 1);
+    /* Múltiplas camadas de text-shadow para efeito realista de tubo de vidro */
+    text-shadow: 
+        /* 1) Borda interna brilhante - contorno do tubo */
+        0 0 1px rgba(79, 195, 255, 1),
+        0 0 2px rgba(79, 195, 255, 0.95),
+        0 0 3px rgba(79, 195, 255, 0.9),
+        /* 2) Halo externo muito sutil - luz refletida no vidro */
+        0 0 4px rgba(79, 195, 255, 0.5),
+        0 0 6px rgba(79, 195, 255, 0.3),
+        /* 3) Luz interna - simula reflexo dentro do tubo */
+        0 0 2px rgba(79, 195, 255, 0.4),
+        0 0 1px rgba(79, 195, 255, 0.6);
+    filter: none;
+    /* Box-shadow combinado: externo da célula + inset para luz interna do tubo */
+    box-shadow: 
+        0 0 6px rgba(155, 92, 255, 0.12),
+        inset 0 0 6px rgba(155, 92, 255, 0.02),
+        inset 0 0 15px rgba(79, 195, 255, 0.15);
+}
+
+.celula.x:hover:not(.disabled) {
+    color: rgba(79, 195, 255, 0.2);
+    -webkit-text-stroke: 3.2px rgba(79, 195, 255, 1);
+    text-shadow: 
+        0 0 1.5px rgba(79, 195, 255, 1),
+        0 0 3px rgba(79, 195, 255, 0.95),
+        0 0 4px rgba(79, 195, 255, 0.9),
+        0 0 5px rgba(79, 195, 255, 0.6),
+        0 0 7px rgba(79, 195, 255, 0.4),
+        0 0 3px rgba(79, 195, 255, 0.5),
+        0 0 1.5px rgba(79, 195, 255, 0.7);
+    box-shadow: 
+        0 0 12px rgba(155, 92, 255, 0.25),
+        inset 0 0 12px rgba(155, 92, 255, 0.08),
+        inset 0 0 20px rgba(79, 195, 255, 0.2);
+}
+
+/* Peça O - rosa/magenta neon estilo tubo de vidro: contorno luminoso + inner glow realista */
+.celula.o {
+    color: rgba(255, 79, 216, 0.15); /* Interior muito escuro do tubo */
+    font-weight: 200; /* Fino e elegante */
+    /* Contorno forte e nítido do tubo de vidro */
+    -webkit-text-stroke: 3px rgba(255, 79, 216, 1);
+    /* Múltiplas camadas de text-shadow para efeito realista de tubo de vidro */
+    text-shadow: 
+        /* 1) Borda interna brilhante - contorno do tubo */
+        0 0 1px rgba(255, 79, 216, 1),
+        0 0 2px rgba(255, 79, 216, 0.95),
+        0 0 3px rgba(255, 79, 216, 0.9),
+        /* 2) Halo externo muito sutil - luz refletida no vidro */
+        0 0 4px rgba(255, 79, 216, 0.5),
+        0 0 6px rgba(255, 79, 216, 0.3),
+        /* 3) Luz interna - simula reflexo dentro do tubo */
+        0 0 2px rgba(255, 79, 216, 0.4),
+        0 0 1px rgba(255, 79, 216, 0.6);
+    filter: none;
+    /* Box-shadow combinado: externo da célula + inset para luz interna do tubo */
+    box-shadow: 
+        0 0 6px rgba(155, 92, 255, 0.12),
+        inset 0 0 6px rgba(155, 92, 255, 0.02),
+        inset 0 0 15px rgba(255, 79, 216, 0.15);
+}
+
+.celula.o:hover:not(.disabled) {
+    color: rgba(255, 79, 216, 0.2);
+    -webkit-text-stroke: 3.2px rgba(255, 79, 216, 1);
+    text-shadow: 
+        0 0 1.5px rgba(255, 79, 216, 1),
+        0 0 3px rgba(255, 79, 216, 0.95),
+        0 0 4px rgba(255, 79, 216, 0.9),
+        0 0 5px rgba(255, 79, 216, 0.6),
+        0 0 7px rgba(255, 79, 216, 0.4),
+        0 0 3px rgba(255, 79, 216, 0.5),
+        0 0 1.5px rgba(255, 79, 216, 0.7);
+    box-shadow: 
+        0 0 12px rgba(155, 92, 255, 0.25),
+        inset 0 0 12px rgba(155, 92, 255, 0.08),
+        inset 0 0 20px rgba(255, 79, 216, 0.2);
+}
+
+/* Células vencedoras - estilo tubo de vidro com animação pulsante suave */
+.celula.x.vencedor {
+    color: rgba(79, 195, 255, 0.25);
+    font-weight: 200;
+    -webkit-text-stroke: 3.2px rgba(79, 195, 255, 1);
+    text-shadow: 
+        0 0 1.5px rgba(79, 195, 255, 1),
+        0 0 3px rgba(79, 195, 255, 0.95),
+        0 0 4px rgba(79, 195, 255, 0.9),
+        0 0 5px rgba(79, 195, 255, 0.6),
+        0 0 7px rgba(79, 195, 255, 0.4),
+        0 0 3px rgba(79, 195, 255, 0.5),
+        0 0 1.5px rgba(79, 195, 255, 0.7);
+    filter: none;
+    box-shadow: 
+        0 0 6px rgba(155, 92, 255, 0.12),
+        inset 0 0 6px rgba(155, 92, 255, 0.02),
+        inset 0 0 20px rgba(79, 195, 255, 0.2);
+    opacity: 1;
+    animation: pulseVencedor 1.4s ease-in-out infinite;
+}
+
+.celula.o.vencedor {
+    color: rgba(255, 79, 216, 0.25);
+    font-weight: 200;
+    -webkit-text-stroke: 3.2px rgba(255, 79, 216, 1);
+    text-shadow: 
+        0 0 1.5px rgba(255, 79, 216, 1),
+        0 0 3px rgba(255, 79, 216, 0.95),
+        0 0 4px rgba(255, 79, 216, 0.9),
+        0 0 5px rgba(255, 79, 216, 0.6),
+        0 0 7px rgba(255, 79, 216, 0.4),
+        0 0 3px rgba(255, 79, 216, 0.5),
+        0 0 1.5px rgba(255, 79, 216, 0.7);
+    filter: none;
+    box-shadow: 
+        0 0 6px rgba(155, 92, 255, 0.12),
+        inset 0 0 6px rgba(155, 92, 255, 0.02),
+        inset 0 0 20px rgba(255, 79, 216, 0.2);
+    opacity: 1;
+    animation: pulseVencedor 1.4s ease-in-out infinite;
+}
+
+/* Células não vencedoras - escurecidas quando há vencedor */
+.celula.x.escurecido {
+    color: #2a7a99;
+    text-shadow: 
+        0 0 2px #2a7a99,
+        0 0 4px #2a7a99;
+    filter: drop-shadow(0 0 1px #2a7a99);
+    opacity: 0.3;
+}
+
+.celula.o.escurecido {
+    color: #992a7a;
+    text-shadow: 
+        0 0 2px #992a7a,
+        0 0 4px #992a7a;
+    filter: drop-shadow(0 0 1px #992a7a);
+    opacity: 0.3;
+}
+
+/* Animação pulsante suave apenas nos símbolos vencedores */
+@keyframes pulseVencedor {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.03);
+        opacity: 0.95;
+        filter: brightness(1.15);
+    }
+}
+
+/* Botão de reiniciar - estilo neon roxo */
+.btn-reiniciar {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.2) 0%, rgba(120, 60, 200, 0.2) 100%);
+    color: #9b5cff;
+    border: 2px solid rgba(155, 92, 255, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 8px rgba(155, 92, 255, 0.8);
+    box-shadow: 
+        0 0 12px rgba(155, 92, 255, 0.3),
+        inset 0 0 12px rgba(155, 92, 255, 0.1);
+}
+
+.btn-reiniciar:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.4) 0%, rgba(120, 60, 200, 0.4) 100%);
+    border-color: rgba(155, 92, 255, 0.7);
+    box-shadow: 
+        0 0 20px rgba(155, 92, 255, 0.5),
+        0 0 30px rgba(155, 92, 255, 0.3),
+        inset 0 0 15px rgba(155, 92, 255, 0.2);
+    text-shadow: 0 0 12px rgba(155, 92, 255, 1);
+}
+
+.btn-reiniciar:active {
+    transform: translateY(0);
+}
+
+/* Estados de carregamento */
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+/* Estado de vencedor - neon roxo */
+.status.vencedor {
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.3) 0%, rgba(120, 60, 200, 0.3) 100%);
+    color: #9b5cff;
+    border-color: rgba(155, 92, 255, 0.6);
+    text-shadow: 0 0 10px rgba(155, 92, 255, 1);
+    box-shadow: 
+        0 0 20px rgba(155, 92, 255, 0.6),
+        inset 0 0 15px rgba(155, 92, 255, 0.2);
+    animation: pulse 0.5s ease;
+}
+
+/* Estado de empate - neon roxo suave */
+.status.empate {
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.2) 0%, rgba(120, 60, 200, 0.2) 100%);
+    color: #b88aff;
+    border-color: rgba(155, 92, 255, 0.4);
+    text-shadow: 0 0 8px rgba(155, 92, 255, 0.8);
+    box-shadow: 
+        0 0 15px rgba(155, 92, 255, 0.4),
+        inset 0 0 10px rgba(155, 92, 255, 0.1);
+}
+
+/* Animação de pulso */
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+    }
+    50% { 
+        transform: scale(1.05); 
+    }
+}
+
+/* ============================================
+   TELA DE SELEÇÃO DE JOGADORES
+   ============================================ */
+.selecao-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    margin-top: 20px;
+    min-height: auto;
+}
+
+.jogadores-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.jogador-selecao {
+    background: 
+        linear-gradient(135deg, rgba(18, 5, 29, 0.95) 0%, rgba(42, 13, 63, 0.95) 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(155, 92, 255, 0.08) 2px, rgba(155, 92, 255, 0.08) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(155, 92, 255, 0.08) 2px, rgba(155, 92, 255, 0.08) 4px);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 
+        0 0 20px rgba(155, 92, 255, 0.3),
+        0 0 35px rgba(155, 92, 255, 0.2),
+        0 0 50px rgba(155, 92, 255, 0.1),
+        inset 0 0 15px rgba(155, 92, 255, 0.05);
+    border: 2px solid rgba(155, 92, 255, 0.3);
+}
+
+.jogador-selecao h2 {
+    color: #9b5cff;
+    text-align: center;
+    margin-bottom: 12px;
+    font-size: 1.3em;
+    text-shadow: 0 0 8px rgba(155, 92, 255, 0.6);
+}
+
+.nome-selecao {
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.nome-selecao label {
+    display: block;
+    color: #9b5cff;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+.nome-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(18, 5, 29, 0.8);
+    border: 2px solid rgba(155, 92, 255, 0.4);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 0 8px rgba(155, 92, 255, 0.2),
+        inset 0 0 8px rgba(155, 92, 255, 0.05);
+}
+
+.nome-input:focus {
+    outline: none;
+    border-color: rgba(155, 92, 255, 0.7);
+    box-shadow: 
+        0 0 15px rgba(155, 92, 255, 0.4),
+        inset 0 0 12px rgba(155, 92, 255, 0.1);
+}
+
+.nome-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.imagens-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 15px;
+    padding-bottom: 0;
+}
+
+.imagem-opcao {
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.imagem-preview {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    border: 1.5px solid rgba(155, 92, 255, 0.3);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: rgba(18, 5, 29, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.imagem-preview img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+
+.imagem-opcao:hover .imagem-preview {
+    border-color: rgba(155, 92, 255, 0.6);
+    box-shadow: 0 0 12px rgba(155, 92, 255, 0.4);
+    transform: scale(1.03);
+}
+
+.imagem-opcao.selecionada .imagem-preview {
+    border-color: #9b5cff;
+    box-shadow: 0 0 15px rgba(155, 92, 255, 0.8);
+    transform: scale(1.05);
+}
+
+
+.simbolo-selecao {
+    text-align: center;
+}
+
+.simbolo-selecao label {
+    display: block;
+    color: #9b5cff;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.simbolos-opcoes {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.simbolo-btn {
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(155, 92, 255, 0.4);
+    border-radius: 10px;
+    background: rgba(155, 92, 255, 0.1);
+    color: #9b5cff;
+    font-size: 2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.simbolo-btn:hover {
+    border-color: rgba(155, 92, 255, 0.7);
+    background: rgba(155, 92, 255, 0.2);
+    box-shadow: 0 0 15px rgba(155, 92, 255, 0.4);
+}
+
+.simbolo-btn.ativo {
+    border-color: #9b5cff;
+    background: rgba(155, 92, 255, 0.3);
+    box-shadow: 0 0 20px rgba(155, 92, 255, 0.8);
+}
+
+.btn-iniciar {
+    display: block;
+    margin: 30px auto;
+    padding: 15px 60px;
+    font-size: 1.3em;
+    font-weight: bold;
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.3) 0%, rgba(120, 60, 200, 0.3) 100%);
+    color: #9b5cff;
+    border: 2px solid rgba(155, 92, 255, 0.5);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 8px rgba(155, 92, 255, 0.8);
+    box-shadow: 
+        0 0 12px rgba(155, 92, 255, 0.3),
+        inset 0 0 12px rgba(155, 92, 255, 0.1);
+    max-width: 300px;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-iniciar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.5) 0%, rgba(120, 60, 200, 0.5) 100%);
+    border-color: rgba(155, 92, 255, 0.8);
+    box-shadow: 
+        0 0 20px rgba(155, 92, 255, 0.5),
+        0 0 30px rgba(155, 92, 255, 0.3),
+        inset 0 0 15px rgba(155, 92, 255, 0.2);
+    text-shadow: 0 0 12px rgba(155, 92, 255, 1);
+}
+
+.btn-iniciar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   TÍTULO EM CARD NEON
+   ============================================ */
+.titulo-card {
+    background: 
+        linear-gradient(135deg, rgba(18, 5, 29, 0.95) 0%, rgba(42, 13, 63, 0.95) 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(155, 92, 255, 0.08) 2px, rgba(155, 92, 255, 0.08) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(155, 92, 255, 0.08) 2px, rgba(155, 92, 255, 0.08) 4px);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px 40px;
+    margin: 20px auto 30px;
+    max-width: 500px;
+    box-shadow: 
+        0 0 20px rgba(155, 92, 255, 0.3),
+        0 0 35px rgba(155, 92, 255, 0.2),
+        0 0 50px rgba(155, 92, 255, 0.1),
+        inset 0 0 15px rgba(155, 92, 255, 0.05);
+    border: 2px solid rgba(155, 92, 255, 0.3);
+    text-align: center;
+}
+
+.titulo-card h1 {
+    color: white;
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.3),
+        2px 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   BOTÃO REFRESH
+   ============================================ */
+.btn-refresh {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.2) 0%, rgba(120, 60, 200, 0.2) 100%);
+    border: 2px solid rgba(155, 92, 255, 0.4);
+    color: #9b5cff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    box-shadow: 
+        0 0 12px rgba(155, 92, 255, 0.3),
+        inset 0 0 12px rgba(155, 92, 255, 0.1);
+}
+
+.btn-refresh:hover {
+    transform: rotate(180deg) scale(1.1);
+    background: linear-gradient(135deg, rgba(155, 92, 255, 0.4) 0%, rgba(120, 60, 200, 0.4) 100%);
+    border-color: rgba(155, 92, 255, 0.7);
+    box-shadow: 
+        0 0 20px rgba(155, 92, 255, 0.5),
+        0 0 30px rgba(155, 92, 255, 0.3),
+        inset 0 0 15px rgba(155, 92, 255, 0.2);
+}
+
+/* ============================================
+   CONTADORES DE JOGADORES
+   ============================================ */
+.contadores-wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.contador-jogador {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(18, 5, 29, 0.8) 0%, rgba(42, 13, 63, 0.8) 100%);
+    border: 2px solid rgba(155, 92, 255, 0.3);
+    border-radius: 15px;
+    box-shadow: 
+        0 0 10px rgba(155, 92, 255, 0.2),
+        inset 0 0 10px rgba(155, 92, 255, 0.05);
+}
+
+.contador-imagem {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid rgba(155, 92, 255, 0.4);
+    box-shadow: 0 0 10px rgba(155, 92, 255, 0.3);
+}
+
+.contador-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.contador-nome {
+    color: #9b5cff;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(155, 92, 255, 0.6);
+}
+
+.contador-pontos {
+    color: white;
+    font-size: 1.8em;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* ============================================
+   DISPLAY DE TURNO
+   ============================================ */
+.turno-display {
+    text-align: center;
+    color: white;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-top: 20px;
+    padding: 15px;
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.3),
+        2px 2px 8px rgba(0, 0, 0, 0.5);
+}
