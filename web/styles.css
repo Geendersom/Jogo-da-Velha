@@ -676,10 +676,32 @@ body::after {
     box-shadow: 0 0 15px rgba(155, 92, 255, 0.4);
 }
 
-.simbolo-btn.ativo {
-    border-color: #9b5cff;
-    background: rgba(155, 92, 255, 0.3);
-    box-shadow: 0 0 20px rgba(155, 92, 255, 0.8);
+/* Símbolo X ativo - azul neon */
+.simbolo-btn.ativo[data-simbolo="X"] {
+    border-color: rgba(79, 195, 255, 0.8);
+    background: rgba(79, 195, 255, 0.2);
+    color: #4fc3ff;
+    box-shadow: 
+        0 0 20px rgba(79, 195, 255, 0.8),
+        0 0 30px rgba(79, 195, 255, 0.5),
+        inset 0 0 15px rgba(79, 195, 255, 0.1);
+    text-shadow: 
+        0 0 8px rgba(79, 195, 255, 1),
+        0 0 12px rgba(79, 195, 255, 0.8);
+}
+
+/* Símbolo O ativo - rosa/magenta neon */
+.simbolo-btn.ativo[data-simbolo="O"] {
+    border-color: rgba(255, 79, 216, 0.8);
+    background: rgba(255, 79, 216, 0.2);
+    color: #ff4fd8;
+    box-shadow: 
+        0 0 20px rgba(255, 79, 216, 0.8),
+        0 0 30px rgba(255, 79, 216, 0.5),
+        inset 0 0 15px rgba(255, 79, 216, 0.1);
+    text-shadow: 
+        0 0 8px rgba(255, 79, 216, 1),
+        0 0 12px rgba(255, 79, 216, 0.8);
 }
 
 .btn-iniciar {

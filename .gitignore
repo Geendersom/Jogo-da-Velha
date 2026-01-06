@@ -1,7 +1,7 @@
 # Arquivos de código - esconder do Git
 *.py
-*.html
-*.css
+# HTML e CSS - permitir arquivos web (selecao.html, index.html, styles.css)
+# Removido *.html e *.css para permitir rastreamento dos arquivos web
 *.js
 *.ts
 *.tsx
