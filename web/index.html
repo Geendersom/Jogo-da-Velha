@@ -92,18 +92,26 @@
             document.getElementById('pontos-jogador1').textContent = contadores.jogador1;
             document.getElementById('pontos-jogador2').textContent = contadores.jogador2;
             
-            // Atualiza imagens dos jogadores
-            const cores = {
-                '1': 'linear-gradient(135deg, #4a90e2 0%, #357abd 100%)',
-                '2': 'linear-gradient(135deg, #50c878 0%, #3da85a 100%)',
-                '3': 'linear-gradient(135deg, #228b22 0%, #1a6b1a 100%)',
-                '4': 'linear-gradient(135deg, #4a90e2 0%, #357abd 100%)',
-                '5': 'linear-gradient(135deg, #50c878 0%, #3da85a 100%)',
-                '6': 'linear-gradient(135deg, #ffd700 0%, #ffb347 100%)'
-            };
+            // Atualiza nomes dos jogadores
+            const nomeJogador1 = jogador1Data.nome || 'Jogador 1';
+            const nomeJogador2 = jogador2Data.nome || 'Jogador 2';
+            document.getElementById('contador-jogador1').querySelector('.contador-nome').textContent = nomeJogador1;
+            document.getElementById('contador-jogador2').querySelector('.contador-nome').textContent = nomeJogador2;
             
-            document.getElementById('imagem-jogador1').style.background = cores[jogador1Data.imagem] || cores['1'];
-            document.getElementById('imagem-jogador2').style.background = cores[jogador2Data.imagem] || cores['2'];
+            // Atualiza imagens dos jogadores (usando imagens reais)
+            const imagemJogador1El = document.getElementById('imagem-jogador1');
+            const imagemJogador2El = document.getElementById('imagem-jogador2');
+            
+            // Remove background anterior e adiciona imagem
+            imagemJogador1El.style.background = 'none';
+            imagemJogador1El.style.backgroundImage = `url('../assets/${jogador1Data.imagem}')`;
+            imagemJogador1El.style.backgroundSize = 'cover';
+            imagemJogador1El.style.backgroundPosition = 'center';
+            
+            imagemJogador2El.style.background = 'none';
+            imagemJogador2El.style.backgroundImage = `url('../assets/${jogador2Data.imagem}')`;
+            imagemJogador2El.style.backgroundSize = 'cover';
+            imagemJogador2El.style.backgroundPosition = 'center';
         }
 
         // Botão refresh - zera tudo e volta para seleção
