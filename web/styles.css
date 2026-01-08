@@ -923,15 +923,45 @@ body::after {
 /* ============================================
    DISPLAY DE TURNO
    ============================================ */
-.turno-display {
+/* Wrapper para contador do jogador */
+.contador-jogador-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Mensagem de turno acima do card do jogador */
+.turno-display-jogador {
     text-align: center;
     color: white;
-    font-size: 1.3em;
+    font-size: 1.2em;
     font-weight: bold;
-    padding: 15px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, rgba(18, 5, 29, 0.9) 0%, rgba(42, 13, 63, 0.9) 100%);
+    border: 2px solid rgba(155, 92, 255, 0.4);
+    border-radius: 15px;
+    box-shadow: 
+        0 0 10px rgba(155, 92, 255, 0.3),
+        0 0 20px rgba(155, 92, 255, 0.2);
     text-shadow: 
         0 0 10px rgba(255, 255, 255, 0.3),
         2px 2px 8px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+}
+
+/* Card do jogador esmaecido (não está jogando) */
+.contador-jogador.esmaecido {
+    opacity: 0.4;
+    filter: brightness(0.6);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Card do jogador ativo (está jogando) */
+.contador-jogador.ativo {
+    opacity: 1;
+    filter: brightness(1);
+    transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
 /* ============================================

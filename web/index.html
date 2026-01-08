@@ -23,11 +23,14 @@
     <!-- Wrapper principal para layout horizontal -->
     <div class="main-game-wrapper">
         <!-- Jogador 1 - Esquerda (fora do card) -->
-        <div class="contador-jogador contador-esquerda" id="contador-jogador1">
-            <div class="contador-imagem" id="imagem-jogador1"></div>
-            <div class="contador-info">
-                <span class="contador-nome">Jogador 1</span>
-                <span class="contador-pontos" id="pontos-jogador1">0</span>
+        <div class="contador-jogador-wrapper">
+            <div id="turno-display-jogador1" class="turno-display-jogador" style="display: none;"></div>
+            <div class="contador-jogador contador-esquerda" id="contador-jogador1">
+                <div class="contador-imagem" id="imagem-jogador1"></div>
+                <div class="contador-info">
+                    <span class="contador-nome">Jogador 1</span>
+                    <span class="contador-pontos" id="pontos-jogador1">0</span>
+                </div>
             </div>
         </div>
         
@@ -54,17 +57,18 @@
                     <div class="celula" data-pos="3"></div>
                     <div class="linha-vitoria" id="linha-vitoria"></div>
                 </div>
-                <!-- Turno embaixo do tabuleiro -->
-                <div id="turno-display" class="turno-display">Carregando...</div>
             </div>
         </div>
         
         <!-- Jogador 2 - Direita (fora do card) -->
-        <div class="contador-jogador contador-direita" id="contador-jogador2">
-            <div class="contador-imagem" id="imagem-jogador2"></div>
-            <div class="contador-info">
-                <span class="contador-nome">Jogador 2</span>
-                <span class="contador-pontos" id="pontos-jogador2">0</span>
+        <div class="contador-jogador-wrapper">
+            <div id="turno-display-jogador2" class="turno-display-jogador" style="display: none;"></div>
+            <div class="contador-jogador contador-direita" id="contador-jogador2">
+                <div class="contador-imagem" id="imagem-jogador2"></div>
+                <div class="contador-info">
+                    <span class="contador-nome">Jogador 2</span>
+                    <span class="contador-pontos" id="pontos-jogador2">0</span>
+                </div>
             </div>
         </div>
     </div>
@@ -230,61 +234,8 @@
         // FUNÇÕES PARA O PYTHON CHAMAR
         // ============================================
         
-        // Variável para controlar se há vitória ativa
-        let vitoriaAtiva = false;
-
-        // Atualiza display de turno
-        function atualizarTurno(simbolo) {
-            // Não atualiza se há vitória ativa
-            if (vitoriaAtiva) {
-                return;
-            }
-            
-            const turnoDisplay = document.getElementById('turno-display');
-            if (!turnoDisplay) return;
-            
-            // Encontra o jogador pelo símbolo
-            let nomeJogador = '';
-            if (jogador1Data && jogador1Data.simbolo === simbolo) {
-                nomeJogador = jogador1Data.nome || 'Jogador 1';
-            } else if (jogador2Data && jogador2Data.simbolo === simbolo) {
-                nomeJogador = jogador2Data.nome || 'Jogador 2';
-            } else {
-                nomeJogador = `Jogador ${simbolo}`;
-            }
-            turnoDisplay.textContent = `${nomeJogador}, agora é a sua vez!`;
-        }
-
-        // Atualiza display com mensagem de vitória
-        function atualizarVitoria(simboloVencedor) {
-            const turnoDisplay = document.getElementById('turno-display');
-            if (!turnoDisplay) {
-                console.error('Elemento turno-display não encontrado');
-                return;
-            }
-            
-            // Marca que há vitória ativa
-            vitoriaAtiva = true;
-            
-            // Encontra o jogador vencedor pelo símbolo
-            let nomeJogador = '';
-            if (jogador1Data && jogador1Data.simbolo === simboloVencedor) {
-                nomeJogador = jogador1Data.nome || 'Jogador 1';
-            } else if (jogador2Data && jogador2Data.simbolo === simboloVencedor) {
-                nomeJogador = jogador2Data.nome || 'Jogador 2';
-            } else {
-                nomeJogador = `Jogador ${simboloVencedor}`;
-            }
-            
-            turnoDisplay.textContent = `${nomeJogador} ganhou essa partida!`;
-            console.log('Mensagem de vitória atualizada:', turnoDisplay.textContent, 'Símbolo:', simboloVencedor);
-        }
-
-        // Atualiza display com mensagem de empate
-        function atualizarEmpate() {
-            const turnoDisplay = document.getElementById('turno-display');
-            turnoDisplay.textContent = 'Empate! Ninguém venceu essa partida.';
-        }
+        // Variável para controlar se há vitória ativa (usada pelo Python)
+        window.vitoriaAtiva = false;
 
         // Adiciona vitória e reinicia automaticamente
         function adicionarVitoria(simboloVencedor) {
@@ -304,7 +255,7 @@
             // Reinicia automaticamente após 2 segundos
             setTimeout(() => {
                 // Reseta flag de vitória antes de reiniciar
-                vitoriaAtiva = false;
+                window.vitoriaAtiva = false;
                 
                 if (window.jogo && typeof window.jogo.reiniciar === 'function') {
                     window.jogo.reiniciar();
@@ -316,9 +267,6 @@
         // Exporta funções para uso no Python
         window.tocarSomClique = tocarSomClique;
         window.tocarSomVitoria = tocarSomVitoria;
-        window.atualizarTurno = atualizarTurno;
-        window.atualizarVitoria = atualizarVitoria;
-        window.atualizarEmpate = atualizarEmpate;
         window.adicionarVitoria = adicionarVitoria;
         window.jogador1Data = jogador1Data;
         window.jogador2Data = jogador2Data;

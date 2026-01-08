@@ -128,15 +128,64 @@ class JogoDaVelha:
             status_el.classList.add('empate')
     
     def atualizar_turno(self):
-        """Atualiza o display de turno"""
+        """Atualiza o display de turno acima do card do jogador atual - lógica em Python"""
         try:
             # Verifica se há vitória ativa (não atualiza se houver)
             vitoria_ativa = getattr(window, 'vitoriaAtiva', False)
             if vitoria_ativa:
                 return
-            window.atualizarTurno(self.turno)
-        except:
-            pass
+            
+            # Obtém dados dos jogadores
+            jogador1_data = window.jogador1Data
+            jogador2_data = window.jogador2Data
+            
+            # Encontra qual jogador está jogando
+            jogador_atual = None
+            nome_jogador = ''
+            
+            if jogador1_data and jogador1_data.simbolo == self.turno:
+                jogador_atual = 1
+                nome_jogador = jogador1_data.nome if jogador1_data.nome else 'Jogador 1'
+            elif jogador2_data and jogador2_data.simbolo == self.turno:
+                jogador_atual = 2
+                nome_jogador = jogador2_data.nome if jogador2_data.nome else 'Jogador 2'
+            else:
+                nome_jogador = f'Jogador {self.turno}'
+            
+            # Esconde todas as mensagens de turno
+            turno_display_1 = document.getElementById('turno-display-jogador1')
+            turno_display_2 = document.getElementById('turno-display-jogador2')
+            
+            if turno_display_1:
+                turno_display_1.style.display = 'none'
+            if turno_display_2:
+                turno_display_2.style.display = 'none'
+            
+            # Mostra mensagem no card do jogador atual
+            if jogador_atual == 1 and turno_display_1:
+                turno_display_1.textContent = f'{nome_jogador}, agora é a sua vez!'
+                turno_display_1.style.display = 'block'
+            elif jogador_atual == 2 and turno_display_2:
+                turno_display_2.textContent = f'{nome_jogador}, agora é a sua vez!'
+                turno_display_2.style.display = 'block'
+            
+            # Atualiza estilo dos cards (ativo/esmaecido)
+            card_jogador1 = document.getElementById('contador-jogador1')
+            card_jogador2 = document.getElementById('contador-jogador2')
+            
+            if card_jogador1 and card_jogador2:
+                if jogador_atual == 1:
+                    card_jogador1.classList.add('ativo')
+                    card_jogador1.classList.remove('esmaecido')
+                    card_jogador2.classList.add('esmaecido')
+                    card_jogador2.classList.remove('ativo')
+                elif jogador_atual == 2:
+                    card_jogador2.classList.add('ativo')
+                    card_jogador2.classList.remove('esmaecido')
+                    card_jogador1.classList.add('esmaecido')
+                    card_jogador1.classList.remove('ativo')
+        except Exception as e:
+            console.error(f'Erro ao atualizar turno: {e}')
     
     def atualizar_mensagem_vitoria(self, simbolo_vencedor):
         """Atualiza mensagem de vitória no display de turno - lógica em Python"""
@@ -268,11 +317,27 @@ class JogoDaVelha:
             except:
                 pass
         elif estado == "empate":
-            # Atualiza mensagem de empate no display de turno (lógica em Python)
+            # Atualiza mensagem de empate (lógica em Python)
             try:
-                turno_display = document.getElementById('turno-display')
-                if turno_display:
-                    turno_display.textContent = 'Empate! Ninguém venceu essa partida.'
+                # Esconde todas as mensagens de turno
+                turno_display_1 = document.getElementById('turno-display-jogador1')
+                turno_display_2 = document.getElementById('turno-display-jogador2')
+                
+                if turno_display_1:
+                    turno_display_1.style.display = 'none'
+                if turno_display_2:
+                    turno_display_2.style.display = 'none'
+                
+                # Remove esmaecimento dos cards
+                card_jogador1 = document.getElementById('contador-jogador1')
+                card_jogador2 = document.getElementById('contador-jogador2')
+                
+                if card_jogador1:
+                    card_jogador1.classList.remove('esmaecido')
+                    card_jogador1.classList.add('ativo')
+                if card_jogador2:
+                    card_jogador2.classList.remove('esmaecido')
+                    card_jogador2.classList.add('ativo')
             except:
                 pass
             
