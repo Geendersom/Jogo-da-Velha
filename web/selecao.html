@@ -208,11 +208,23 @@
                 // Adiciona seleção atual
                 this.classList.add('ativo');
                 
+                // Define o símbolo do jogador que clicou
                 if (jogador === '1') {
                     jogador1.simbolo = simbolo;
+                    // Jogador 2 automaticamente recebe o símbolo oposto
+                    jogador2.simbolo = simbolo === 'X' ? 'O' : 'X';
                 } else {
                     jogador2.simbolo = simbolo;
+                    // Jogador 1 automaticamente recebe o símbolo oposto
+                    jogador1.simbolo = simbolo === 'X' ? 'O' : 'X';
                 }
+                
+                // Atualiza visualmente os botões do outro jogador
+                const outroJogador = jogador === '1' ? '2' : '1';
+                document.querySelectorAll(`.simbolo-btn[data-jogador="${outroJogador}"]`).forEach(btn => {
+                    const simboloBtn = btn.getAttribute('data-simbolo');
+                    btn.classList.toggle('ativo', simboloBtn === (jogador === '1' ? jogador2.simbolo : jogador1.simbolo));
+                });
                 
                 verificarSelecao();
             });
@@ -227,23 +239,10 @@
             jogador2.nome = nome2 || 'Jogador 2';
             
             // Verifica se tudo está preenchido (imagens e símbolos são obrigatórios)
-            if (jogador1.imagem && jogador2.imagem && jogador1.simbolo && jogador2.simbolo) {
-                // Garante que jogador 1 sempre seja X
-                if (jogador1.simbolo !== 'X') {
-                    // Troca os símbolos
-                    const temp = jogador1.simbolo;
-                    jogador1.simbolo = jogador2.simbolo;
-                    jogador2.simbolo = temp;
-                    
-                    // Atualiza visualmente
-                    document.querySelectorAll('.simbolo-btn[data-jogador="1"]').forEach(btn => {
-                        btn.classList.toggle('ativo', btn.getAttribute('data-simbolo') === jogador1.simbolo);
-                    });
-                    document.querySelectorAll('.simbolo-btn[data-jogador="2"]').forEach(btn => {
-                        btn.classList.toggle('ativo', btn.getAttribute('data-simbolo') === jogador2.simbolo);
-                    });
-                }
-                
+            // Garante que os símbolos sejam diferentes (um X e um O)
+            const simbolosValidos = jogador1.simbolo && jogador2.simbolo && jogador1.simbolo !== jogador2.simbolo;
+            
+            if (jogador1.imagem && jogador2.imagem && simbolosValidos) {
                 document.getElementById('btn-iniciar').disabled = false;
             } else {
                 document.getElementById('btn-iniciar').disabled = true;
