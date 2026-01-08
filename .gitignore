@@ -3,6 +3,8 @@
 # HTML e CSS - permitir arquivos web (selecao.html, index.html, styles.css)
 # Removido *.html e *.css para permitir rastreamento dos arquivos web
 *.js
+# Exceção: permitir mensagens.js (arquivo auxiliar necessário)
+!web/mensagens.js
 *.ts
 *.tsx
 *.jsx
