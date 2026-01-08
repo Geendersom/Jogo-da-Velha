@@ -55,7 +55,7 @@
                     <div class="linha-vitoria" id="linha-vitoria"></div>
                 </div>
                 <!-- Turno embaixo do tabuleiro -->
-                <div id="turno-display" class="turno-display">Turno do X</div>
+                <div id="turno-display" class="turno-display">Carregando...</div>
             </div>
         </div>
         
@@ -233,7 +233,16 @@
         // Atualiza display de turno
         function atualizarTurno(simbolo) {
             const turnoDisplay = document.getElementById('turno-display');
-            turnoDisplay.textContent = `Turno do ${simbolo}`;
+            // Encontra o jogador pelo símbolo
+            let nomeJogador = '';
+            if (jogador1Data.simbolo === simbolo) {
+                nomeJogador = jogador1Data.nome || 'Jogador 1';
+            } else if (jogador2Data.simbolo === simbolo) {
+                nomeJogador = jogador2Data.nome || 'Jogador 2';
+            } else {
+                nomeJogador = `Jogador ${simbolo}`;
+            }
+            turnoDisplay.textContent = `${nomeJogador}, agora é a sua vez!`;
         }
 
         // Adiciona vitória e reinicia automaticamente
