@@ -1,4 +1,5 @@
 """
+
 Jogo da Velha (Tic-Tac-Toe)
 Criado por Geêndersom Araújo
 Linguagem principal: Python
@@ -13,7 +14,6 @@ Arquitetura:
 - CSS (styles.css): Estilização e animações visuais
 - JavaScript: Apenas funções auxiliares mínimas (sons, helpers)
 
-O arquivo Python é o maior arquivo do projeto, contendo toda a lógica central.
 """
 
 # Importações do Pyodide para interação com JavaScript/DOM
@@ -128,7 +128,7 @@ class JogoDaVelha:
             status_el.classList.add('empate')
     
     def atualizar_turno(self):
-        """Atualiza o display de turno acima do card do jogador atual - lógica em Python"""
+        """Atualiza o display de turno acima do card do jogador atual - usa função JavaScript auxiliar"""
         try:
             # Verifica se há vitória ativa (não atualiza se houver)
             vitoria_ativa = getattr(window, 'vitoriaAtiva', False)
@@ -136,86 +136,182 @@ class JogoDaVelha:
                 return
             
             # Obtém dados dos jogadores
-            jogador1_data = window.jogador1Data
-            jogador2_data = window.jogador2Data
+            jogador1_data = None
+            jogador2_data = None
+            try:
+                jogador1_data = window.jogador1Data
+                jogador2_data = window.jogador2Data
+            except:
+                # Tenta acessar via sessionStorage como fallback
+                try:
+                    from js import sessionStorage, JSON  # type: ignore
+                    jogador1_str = sessionStorage.getItem('jogador1')
+                    jogador2_str = sessionStorage.getItem('jogador2')
+                    if jogador1_str and jogador2_str:
+                        jogador1_data = JSON.parse(jogador1_str)
+                        jogador2_data = JSON.parse(jogador2_str)
+                except:
+                    pass
             
-            # Encontra qual jogador está jogando
+            # Determina jogador atual e nome
             jogador_atual = None
             nome_jogador = ''
             
-            if jogador1_data and jogador1_data.simbolo == self.turno:
-                jogador_atual = 1
-                nome_jogador = jogador1_data.nome if jogador1_data.nome else 'Jogador 1'
-            elif jogador2_data and jogador2_data.simbolo == self.turno:
-                jogador_atual = 2
-                nome_jogador = jogador2_data.nome if jogador2_data.nome else 'Jogador 2'
+            if not jogador1_data or not jogador2_data:
+                # Fallback: usa valores padrão
+                jogador_atual = 1 if self.turno == 'X' else 2
+                nome_jogador = f'Jogador {jogador_atual}'
             else:
-                nome_jogador = f'Jogador {self.turno}'
+                # Acessa propriedades
+                try:
+                    jogador1_simbolo = jogador1_data.simbolo
+                except:
+                    jogador1_simbolo = getattr(jogador1_data, 'simbolo', None)
+                
+                try:
+                    jogador2_simbolo = jogador2_data.simbolo
+                except:
+                    jogador2_simbolo = getattr(jogador2_data, 'simbolo', None)
+                
+                # Encontra qual jogador está jogando
+                if jogador1_simbolo == self.turno:
+                    jogador_atual = 1
+                    try:
+                        nome_jogador = jogador1_data.nome or 'Jogador 1'
+                    except:
+                        nome_jogador = getattr(jogador1_data, 'nome', None) or 'Jogador 1'
+                elif jogador2_simbolo == self.turno:
+                    jogador_atual = 2
+                    try:
+                        nome_jogador = jogador2_data.nome or 'Jogador 2'
+                    except:
+                        nome_jogador = getattr(jogador2_data, 'nome', None) or 'Jogador 2'
+                else:
+                    # Fallback
+                    jogador_atual = 1 if self.turno == 'X' else 2
+                    nome_jogador = f'Jogador {jogador_atual}'
             
-            # Esconde todas as mensagens de turno
-            turno_display_1 = document.getElementById('turno-display-jogador1')
-            turno_display_2 = document.getElementById('turno-display-jogador2')
-            
-            if turno_display_1:
-                turno_display_1.style.display = 'none'
-            if turno_display_2:
-                turno_display_2.style.display = 'none'
-            
-            # Mostra mensagem no card do jogador atual
-            if jogador_atual == 1 and turno_display_1:
-                turno_display_1.textContent = f'{nome_jogador}, agora é a sua vez!'
-                turno_display_1.style.display = 'block'
-            elif jogador_atual == 2 and turno_display_2:
-                turno_display_2.textContent = f'{nome_jogador}, agora é a sua vez!'
-                turno_display_2.style.display = 'block'
-            
-            # Atualiza estilo dos cards (ativo/esmaecido)
-            card_jogador1 = document.getElementById('contador-jogador1')
-            card_jogador2 = document.getElementById('contador-jogador2')
-            
-            if card_jogador1 and card_jogador2:
-                if jogador_atual == 1:
-                    card_jogador1.classList.add('ativo')
-                    card_jogador1.classList.remove('esmaecido')
-                    card_jogador2.classList.add('esmaecido')
-                    card_jogador2.classList.remove('ativo')
-                elif jogador_atual == 2:
-                    card_jogador2.classList.add('ativo')
-                    card_jogador2.classList.remove('esmaecido')
-                    card_jogador1.classList.add('esmaecido')
-                    card_jogador1.classList.remove('ativo')
+            # Chama função JavaScript para exibir mensagem
+            console.log(f'🐍 Python chamando exibirMensagemTurno: jogador={jogador_atual}, nome={nome_jogador}')
+            try:
+                # Verifica se a função existe
+                if hasattr(window, 'exibirMensagemTurno'):
+                    console.log('🐍 Função exibirMensagemTurno encontrada no window')
+                    window.exibirMensagemTurno(jogador_atual, nome_jogador)
+                else:
+                    console.error('❌ Função exibirMensagemTurno não encontrada no window')
+                    # Fallback: tenta diretamente
+                    turno_display_1 = document.getElementById('turno-display-jogador1')
+                    turno_display_2 = document.getElementById('turno-display-jogador2')
+                    if jogador_atual == 1 and turno_display_1:
+                        turno_display_1.textContent = f'{nome_jogador}, agora é a sua vez!'
+                        turno_display_1.style.display = 'block'
+                        console.log('✅ Mensagem exibida diretamente (fallback)')
+                    elif jogador_atual == 2 and turno_display_2:
+                        turno_display_2.textContent = f'{nome_jogador}, agora é a sua vez!'
+                        turno_display_2.style.display = 'block'
+                        console.log('✅ Mensagem exibida diretamente (fallback)')
+            except Exception as e:
+                console.error(f'❌ Erro ao chamar exibirMensagemTurno: {e}')
+                import traceback
+                console.error(traceback.format_exc())
+                # Fallback: tenta diretamente
+                turno_display_1 = document.getElementById('turno-display-jogador1')
+                turno_display_2 = document.getElementById('turno-display-jogador2')
+                if jogador_atual == 1 and turno_display_1:
+                    turno_display_1.textContent = f'{nome_jogador}, agora é a sua vez!'
+                    turno_display_1.style.display = 'block'
+                elif jogador_atual == 2 and turno_display_2:
+                    turno_display_2.textContent = f'{nome_jogador}, agora é a sua vez!'
+                    turno_display_2.style.display = 'block'
         except Exception as e:
             console.error(f'Erro ao atualizar turno: {e}')
+            import traceback
+            console.error(traceback.format_exc())
     
     def atualizar_mensagem_vitoria(self, simbolo_vencedor):
-        """Atualiza mensagem de vitória no display de turno - lógica em Python"""
+        """Atualiza mensagem de vitória dentro do card do tabuleiro - usa função JavaScript auxiliar"""
         try:
-            turno_display = document.getElementById('turno-display')
-            if not turno_display:
-                console.error('Elemento turno-display não encontrado')
-                return
-            
             # Marca vitória como ativa
             window.vitoriaAtiva = True
             
             # Obtém dados dos jogadores
-            jogador1_data = window.jogador1Data
-            jogador2_data = window.jogador2Data
+            jogador1_data = None
+            jogador2_data = None
+            try:
+                jogador1_data = window.jogador1Data
+                jogador2_data = window.jogador2Data
+            except:
+                # Tenta acessar via sessionStorage como fallback
+                try:
+                    from js import sessionStorage, JSON  # type: ignore
+                    jogador1_str = sessionStorage.getItem('jogador1')
+                    jogador2_str = sessionStorage.getItem('jogador2')
+                    if jogador1_str and jogador2_str:
+                        jogador1_data = JSON.parse(jogador1_str)
+                        jogador2_data = JSON.parse(jogador2_str)
+                except:
+                    pass
             
-            # Encontra o jogador vencedor pelo símbolo
+            # Determina nome do jogador vencedor
             nome_jogador = ''
-            if jogador1_data and jogador1_data.simbolo == simbolo_vencedor:
-                nome_jogador = jogador1_data.nome if jogador1_data.nome else 'Jogador 1'
-            elif jogador2_data and jogador2_data.simbolo == simbolo_vencedor:
-                nome_jogador = jogador2_data.nome if jogador2_data.nome else 'Jogador 2'
-            else:
+            if not jogador1_data or not jogador2_data:
+                # Usa fallback
                 nome_jogador = f'Jogador {simbolo_vencedor}'
+            else:
+                # Acessa propriedades
+                try:
+                    jogador1_simbolo = jogador1_data.simbolo
+                except:
+                    jogador1_simbolo = getattr(jogador1_data, 'simbolo', None)
+                
+                try:
+                    jogador2_simbolo = jogador2_data.simbolo
+                except:
+                    jogador2_simbolo = getattr(jogador2_data, 'simbolo', None)
+                
+                # Encontra o jogador vencedor
+                if jogador1_simbolo == simbolo_vencedor:
+                    try:
+                        nome_jogador = jogador1_data.nome or 'Jogador 1'
+                    except:
+                        nome_jogador = getattr(jogador1_data, 'nome', None) or 'Jogador 1'
+                elif jogador2_simbolo == simbolo_vencedor:
+                    try:
+                        nome_jogador = jogador2_data.nome or 'Jogador 2'
+                    except:
+                        nome_jogador = getattr(jogador2_data, 'nome', None) or 'Jogador 2'
+                else:
+                    nome_jogador = f'Jogador {simbolo_vencedor}'
             
-            # Atualiza o texto
-            turno_display.textContent = f'{nome_jogador} ganhou essa partida!'
-            console.log(f'Mensagem de vitória atualizada: {nome_jogador} ganhou essa partida!')
+            # Chama função JavaScript para exibir mensagem de vitória
+            console.log(f'🐍 Python chamando exibirMensagemVitoria: nome={nome_jogador}')
+            try:
+                # Verifica se a função existe
+                if hasattr(window, 'exibirMensagemVitoria'):
+                    console.log('🐍 Função exibirMensagemVitoria encontrada no window')
+                    window.exibirMensagemVitoria(nome_jogador)
+                else:
+                    console.error('❌ Função exibirMensagemVitoria não encontrada no window')
+                    # Fallback: tenta diretamente
+                    vitoria_display = document.getElementById('vitoria-display')
+                    if vitoria_display:
+                        vitoria_display.textContent = f'{nome_jogador} ganhou essa partida!'
+                        vitoria_display.style.display = 'block'
+                        console.log('✅ Mensagem de vitória exibida diretamente (fallback)')
+            except Exception as e:
+                console.error(f'❌ Erro ao chamar exibirMensagemVitoria: {e}')
+                import traceback
+                console.error(traceback.format_exc())
+                # Fallback: tenta diretamente
+                vitoria_display = document.getElementById('vitoria-display')
+                if vitoria_display:
+                    vitoria_display.textContent = f'{nome_jogador} ganhou essa partida!'
+                    vitoria_display.style.display = 'block'
         except Exception as e:
             console.error(f'Erro ao atualizar mensagem de vitória: {e}')
+            import traceback
+            console.error(traceback.format_exc())
 
     def habilitar_celulas(self, habilitado):
         """Habilita ou desabilita as células do tabuleiro usando Python"""
@@ -322,16 +418,19 @@ class JogoDaVelha:
                 # Esconde todas as mensagens de turno
                 turno_display_1 = document.getElementById('turno-display-jogador1')
                 turno_display_2 = document.getElementById('turno-display-jogador2')
-                
                 if turno_display_1:
                     turno_display_1.style.display = 'none'
                 if turno_display_2:
                     turno_display_2.style.display = 'none'
                 
+                # Esconde mensagem de vitória se estiver visível
+                vitoria_display = document.getElementById('vitoria-display')
+                if vitoria_display:
+                    vitoria_display.style.display = 'none'
+                
                 # Remove esmaecimento dos cards
                 card_jogador1 = document.getElementById('contador-jogador1')
                 card_jogador2 = document.getElementById('contador-jogador2')
-                
                 if card_jogador1:
                     card_jogador1.classList.remove('esmaecido')
                     card_jogador1.classList.add('ativo')
@@ -585,6 +684,21 @@ class JogoDaVelha:
         """Reinicia o jogo - toda a lógica em Python"""
         # Remove linha de vitória
         self.esconder_linha_vitoria()
+        
+        # Esconde todas as mensagens usando função JavaScript
+        try:
+            window.esconderTodasMensagens()
+        except:
+            # Fallback: esconde manualmente
+            vitoria_display = document.getElementById('vitoria-display')
+            turno_display_1 = document.getElementById('turno-display-jogador1')
+            turno_display_2 = document.getElementById('turno-display-jogador2')
+            if vitoria_display:
+                vitoria_display.style.display = 'none'
+            if turno_display_1:
+                turno_display_1.style.display = 'none'
+            if turno_display_2:
+                turno_display_2.style.display = 'none'
         
         # Reseta flag de vitória
         try:

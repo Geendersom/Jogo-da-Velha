@@ -444,6 +444,41 @@ body::after {
     }
 }
 
+/* Mensagem de vitória dentro do card do tabuleiro */
+.vitoria-display {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(18, 5, 29, 0.95) 0%, rgba(42, 13, 63, 0.95) 100%);
+    border: 2px solid rgba(155, 92, 255, 0.6);
+    border-radius: 10px;
+    padding: 12px 20px;
+    color: white;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(155, 92, 255, 0.6);
+    box-shadow: 
+        0 0 15px rgba(155, 92, 255, 0.4),
+        inset 0 0 10px rgba(155, 92, 255, 0.1);
+    z-index: 10;
+    white-space: nowrap;
+    display: none;
+    animation: fadeInVitoria 0.5s ease-in;
+}
+
+@keyframes fadeInVitoria {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
 /* Botão de reiniciar - estilo neon roxo */
 .btn-reiniciar {
     width: 100%;
@@ -925,6 +960,7 @@ body::after {
    ============================================ */
 /* Wrapper para contador do jogador */
 .contador-jogador-wrapper {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -933,6 +969,10 @@ body::after {
 
 /* Mensagem de turno acima do card do jogador */
 .turno-display-jogador {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
     color: white;
     font-size: 1.2em;
@@ -948,6 +988,8 @@ body::after {
         0 0 10px rgba(255, 255, 255, 0.3),
         2px 2px 8px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
+    z-index: 10;
+    display: none;
 }
 
 /* Card do jogador esmaecido (não está jogando) */
