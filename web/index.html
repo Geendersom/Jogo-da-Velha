@@ -62,7 +62,7 @@
                 <h1>JOGO DA VELHA</h1>
             </div>
             
-            <div id="status" class="status">Carregando Python...</div>
+            <div id="status" class="status">CARREGANDO JOGO!</div>
             
             <!-- Tabuleiro - Centro -->
             <div class="tabuleiro-wrapper">
@@ -429,14 +429,14 @@
                 return;
             }
             
-            statusEl.textContent = 'Carregando Python...';
+            statusEl.textContent = 'CARREGANDO JOGO!';
             
             try {
                 // Carrega o Pyodide
-                statusEl.textContent = 'Carregando Python (isso pode levar alguns segundos)...';
+                statusEl.textContent = 'CARREGANDO JOGO!';
                 const pyodide = await loadPyodide();
                 
-                statusEl.textContent = 'Carregando jogo...';
+                statusEl.textContent = 'CARREGANDO JOGO!';
                 
                 // Carrega o código Python do arquivo
                 let codigoPython;
