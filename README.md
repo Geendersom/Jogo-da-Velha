@@ -17,15 +17,25 @@ Este projeto demonstra como executar código Python diretamente no navegador, ma
 
 ```
 jogo-da-velha/
-├── web/              # Arquivos web (HTML, CSS, JS)
-│   └── index.html    # Interface do jogo
-├── python/           # Código Python
-│   └── JogoDaVelha.py # Lógica do jogo em Python
-├── server/           # Servidor HTTP
-│   └── server.py     # Servidor Python simples
-├── docs/             # Documentação
-│   └── COMO_EXECUTAR.txt
-└── README.md         # Este arquivo
+├── web/                    # Arquivos web (HTML, CSS, JS)
+│   ├── index.html          # Interface principal do jogo
+│   ├── selecao.html        # Tela de seleção de jogadores
+│   ├── styles.css          # Estilos CSS do jogo
+│   └── mensagens.js       # JavaScript auxiliar para mensagens
+├── python/                 # Código Python
+│   └── JogoDaVelha.py     # Lógica principal do jogo em Python
+├── server/                 # Servidor HTTP
+│   └── server.py           # Servidor Python simples
+├── docs/                   # Documentação
+│   └── COMO_EXECUTAR.txt  # Instruções de execução
+├── assets/                 # Recursos do jogo
+│   ├── print1.png         # Preview 1 do jogo
+│   ├── print2.png         # Preview 2 do jogo
+│   └── *.png              # Avatares dos jogadores
+├── favicon.png            # Ícone do jogo
+├── wallpaper.jpg          # Imagem de fundo
+├── ESTRUTURA.md           # Documentação da estrutura
+└── README.md              # Este arquivo
 ```
 
 ## 🚀 Como Executar
